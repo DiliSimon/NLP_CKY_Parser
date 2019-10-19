@@ -1,5 +1,7 @@
 import util
-from collections import Set
+from collections import Set, defaultdict
+import math
+import argparse
 
 
 def CKY(sent:str, gr:dict):
@@ -23,7 +25,7 @@ def CKY(sent:str, gr:dict):
             # print('\n')
             for k in range(1, j-i+1):
                 # print('\n')
-                parents = util.find_parent(matrix[i][j-k], matrix[j+1-k][j], gr)
+                parents = util.find_parent(matrix[i][j-k], matrix[j+1-k][j], gr, k)
                 # if i == 2 and j == 3:
                 #     # print('k: ' + str(k))
                 #     # print('i: ' + str(i))
@@ -37,13 +39,57 @@ def CKY(sent:str, gr:dict):
     return matrix
 
 
+def reverse_CKY(rslt:list):
+
+    return
+
+
 if __name__ == '__main__':
-    gr = util.load_grammar('flight.gr')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("mode", type=str,
+                        help="type in mode")
+    parser.add_argument("filename", type=str,
+                        help="type in the grammar filepath")
+    parser.add_argument("sentence", type=str, help="filepath that contains sentences")
+    args = parser.parse_args()
+
+    gr = util.load_grammar(args.filename)
+
+    if args.mode == 'RECOGNIZER':
+        sent = util.load_sentence(args.sentence)
+        for s in sent:
+            length = len(s.split())
+            rslt = CKY(s, gr)
+            if len(rslt[0][length-1]) != 0:
+                print('True')
+                continue
+            print('False')
+        exit()
+
+    if args.mode == 'BEST-PARSE':
+        sent = util.load_sentence(args.sentence)
+        for s in sent:
+            length = len(s.split())
+            rslt = CKY(s, gr)
+            if len(rslt[0][length - 1]) != 0:
+                k = 0
+                max = 0
+                for root in rslt[0][length - 1]: # find the most probable root
+                    if root[1] > max:
+                        k = root[-1]
+
+
+                continue
+            print('False')
+        exit()
+
 
     # test_list_first = ['S', 'VP', 'NP', 'Nominal', 'Noun', 'Verb']
     # test_list_second = ['Det']
     # print(util.find_parent(test_list_first, test_list_second, gr))
 
     rslt = CKY('book the dinner flight .', gr)
-    print(rslt[1][3])
+    print(rslt[2][2])
+    print(rslt[0][4])
+    print(-math.log(rslt[0][4][1][1])/math.log(2))
     #print(rslt[0][0])

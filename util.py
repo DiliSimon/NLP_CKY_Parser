@@ -9,6 +9,12 @@ def random_number(num):
     return rand
 
 
+def load_sentence(filename):
+    with open(filename) as f:
+        lines = f.readlines()
+        return lines
+
+
 def load_grammar(filename):
     grammar = defaultdict(list)
     with open(filename) as f:
@@ -36,16 +42,25 @@ def load_grammar(filename):
     return g
 
 
-def find_parent(children_first: list, children_second:list, gr:dict):
+def find_parent(children_first: list, children_second:list, gr:dict, k_value):
     parents = list()
-    for f in children_first:
-        for s in children_second:
+    for f_list in children_first:
+        f = f_list[0]
+        for s_list in children_second:
+            s = s_list[0]
             for k in gr.keys():
                 for rule in gr[k]:
                     if len(rule) != 3:
                         continue
                     if rule[1] == f and rule[2] == s:
-                        parents.append(k)
+                        p = f_list[1] * s_list[1] * rule[0]
+                        rslt = list()
+                        rslt.append(k)
+                        for r in rule:
+                            rslt.append(r)
+                        rslt[1] = p
+                        rslt.append(k_value)
+                        parents.append(rslt)
     return parents
 
 
@@ -54,6 +69,10 @@ def find_parent_terminal(child:str, gr:dict):
     for k in gr.keys():
         for rule in gr[k]:
             if len(rule) == 2 and rule[1] == child:
-                parents.append(k)
+                rslt = list()
+                rslt.append(k)
+                for r in rule:
+                    rslt.append(r)
+                parents.append(rslt)
                 break
     return parents
