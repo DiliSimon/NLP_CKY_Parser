@@ -60,6 +60,8 @@ def find_parent(children_first: list, children_second:list, gr:dict, k_value):
                             rslt.append(r)
                         rslt[1] = p
                         rslt.append(k_value)
+                        rslt.append(f_list[1])
+                        rslt.append(s_list[1])
                         parents.append(rslt)
     return parents
 

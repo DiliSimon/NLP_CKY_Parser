@@ -39,7 +39,42 @@ def CKY(sent:str, gr:dict):
     return matrix
 
 
-def reverse_CKY(rslt:list):
+def reverse_CKY(current_info:list, i, j, rslt:list):
+    # prepare children's indices
+    first_child_i = i
+    first_child_j = j - current_info[-3]
+    second_child_i = j + 1 - current_info[-3]
+    second_child_j = j
+
+    # find first child
+    first_potential_rules = rslt[first_child_i][first_child_j]
+    for r in first_potential_rules:
+        if r[1] == current_info[-2]:
+            first_child_info = r
+    print('(' ,end = '')
+    print(first_child_info[0], end=' ')
+    if len(first_child_info) != 3:
+        reverse_CKY(first_child_info, first_child_i, first_child_j, rslt)
+        print(')', end=' ')
+    else:
+        print(first_child_info[2], end='')
+        print(')', end=' ')
+    #print(')', end = ' ')
+
+    # find second child
+    second_potential_rules = rslt[second_child_i][second_child_j]
+    for r in second_potential_rules:
+        if r[1] == current_info[-1]:
+            second_child_info = r
+    print('(', end = '')
+    print(second_child_info[0], end=' ')
+    if len(second_child_info) != 3:
+        reverse_CKY(second_child_info, second_child_i, second_child_j, rslt)
+        print(')', end='')
+    else:
+        print(second_child_info[2], end='')
+        print(')', end='')
+    #print(')', end='')
 
     return
 
@@ -60,7 +95,11 @@ if __name__ == '__main__':
         for s in sent:
             length = len(s.split())
             rslt = CKY(s, gr)
-            if len(rslt[0][length-1]) != 0:
+            ifroot = False
+            for r in rslt[0][length - 1]:
+                if r[0] == 'ROOT':
+                    ifroot = True
+            if len(rslt[0][length-1]) != 0 and ifroot:
                 print('True')
                 continue
             print('False')
@@ -71,25 +110,45 @@ if __name__ == '__main__':
         for s in sent:
             length = len(s.split())
             rslt = CKY(s, gr)
-            if len(rslt[0][length - 1]) != 0:
+            ifroot = False
+            for r in rslt[0][length-1]:
+                if r[0] == 'ROOT':
+                    ifroot = True
+            if len(rslt[0][length - 1]) != 0 and ifroot:
+                current_info = list()
                 k = 0
                 max = 0
                 for root in rslt[0][length - 1]: # find the most probable root
                     if root[1] > max:
-                        k = root[-1]
-
-
-                continue
-            print('False')
+                        current_info = root
+                        max = root[1]
+                prob = current_info[1]
+                weight = -math.log(prob)/math.log(2)
+                print(round(weight, 3), end='\t')
+                print('(', end='')
+                print(current_info[0], end=' ')
+                reverse_CKY(current_info, 0, length - 1, rslt)
+                print(')')
+            else:
+                print('-\tNOPARSE')
         exit()
 
+    if args.mode == 'TOTAL-WEIGHT':
+        sent = util.load_sentence(args.sentence)
+        for s in sent:
+            length = len(s.split())
+            rslt = CKY(s, gr)
+            if len(rslt[0][length - 1]) != 0:
+                total_prob = 0
+                for r in rslt[0][length - 1]:
+                    total_prob += r[1]
+                total_weight = -math.log(total_prob) / math.log(2)
+                print(round(total_weight, 3))
+            else:
+                print('-')
+        exit()
 
-    # test_list_first = ['S', 'VP', 'NP', 'Nominal', 'Noun', 'Verb']
-    # test_list_second = ['Det']
-    # print(util.find_parent(test_list_first, test_list_second, gr))
-
-    rslt = CKY('book the dinner flight .', gr)
-    print(rslt[2][2])
-    print(rslt[0][4])
-    print(-math.log(rslt[0][4][1][1])/math.log(2))
-    #print(rslt[0][0])
+    rslt = CKY('book the dinner flight', gr)
+    # print(rslt[2][2])
+    # print(rslt)
+    # print(round(-math.log(rslt[0][4][1][1])/math.log(2), 3))
