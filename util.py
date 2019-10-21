@@ -15,6 +15,18 @@ def load_sentence(filename):
         return lines
 
 
+def write_grammar(gr:dict, filename):
+    with open(filename, 'w+') as f:
+        for k in gr.keys():
+            for r in gr[k]:
+                line = str(r[0]) + "\t" + k
+                for e in r[1:]:
+                    line += "\t" + e
+                line += "\n"
+                f.write(line)
+    f.close()
+
+
 def load_grammar(filename):
     grammar = defaultdict(list)
     with open(filename) as f:

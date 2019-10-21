@@ -119,7 +119,7 @@ if __name__ == '__main__':
                 k = 0
                 max = 0
                 for root in rslt[0][length - 1]: # find the most probable root
-                    if root[1] > max:
+                    if root[1] > max and root[0] == 'ROOT':
                         current_info = root
                         max = root[1]
                 prob = current_info[1]
